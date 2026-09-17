@@ -1,0 +1,22 @@
+name: Require Type Label
+
+on:
+  pull_request:
+    types: [opened, labeled, unlabeled, synchronize, reopened]
+
+jobs:
+  check-label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify at least one type label is present
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const required = ['기능', '버그', '작업', '문서'];
+            const labels = context.payload.pull_request.labels.map((l) => l.name);
+            const hasRequired = labels.some((l) => required.includes(l));
+            if (!hasRequired) {
+              core.setFailed(
+                `이 PR에는 다음 중 최소 1개의 라벨이 필요합니다: ${required.join(', ')}`
+              );
+            }
